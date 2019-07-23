@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.jzx.ContainerYardObjectDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jzx.ContainerYardObject">
+        select code,a.YARD_AREA_NO mc,
+to_char((nvl(use_no,0)/all_no)*100,'fm9999990.00')||'%' rate
+,all_no zrl,nvl(use_no,0) syl,(all_no-nvl(use_no,0))  sy,nvl(heavy_count,0) zx,
+nvl(empty_count,0) kx,nvl(outtrade_count,0) nm,nvl(intrade_count,0) wm,nvl(out_count,0)ck,nvl(in_count,0) jk from
+(select YARD_AREA_NO,MAX_BAY*MAX_ROW*MAX_TIER all_no,'JZX-S02-'||replace(lpad((rank() over(order by CONTAINER_YARD_AREA_ID)),4),' ','0') code from hz.dc_container_yard_area) a left join
+(select YARD_AREA_NO,sum(use_no) use_no,sum(heavy_count) heavy_count,sum(empty_count) empty_count,sum(outtrade_count) outtrade_count,sum(intrade_count) intrade_count,sum(out_count) out_count,sum(in_count) in_count from
+(select  YARD_AREA_NO,trunc(CONTAINER_SIZE/20) use_no,
+case when IF_HEAVY ='F'then 1*trunc(CONTAINER_SIZE/20) else 0 end heavy_count,
+case when IF_HEAVY ='E'then 1*trunc(CONTAINER_SIZE/20) else 0 end empty_count,
+case when TRADE_TYPE='O' then 1*trunc(CONTAINER_SIZE/20) else 0 end outtrade_count,
+case when TRADE_TYPE='I' then 1*trunc(CONTAINER_SIZE/20) else 0 end intrade_count,
+case when IF_OUT='O' then 1*trunc(CONTAINER_SIZE/20) else 0 end out_count,
+case when IF_OUT='I' then 1*trunc(CONTAINER_SIZE/20) else 0 end in_count from hz.yw_container_info where IF_SPOT=1)
+  group by YARD_AREA_NO) b on a.yard_area_no=b.yard_area_no
+    </select>
+</mapper>

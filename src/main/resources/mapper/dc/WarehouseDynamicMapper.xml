@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.dc.DcWarehouseDynamicDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.cc.WarehouseDynamic">
+         select l.库房名称 ck,
+       (select g.supplies_type_name
+          from dc.JC_SUPPLIES_TYPE g
+         where g.supplies_type_id = l.物质种类)  hwzl,
+       sum(货重)  hz
+  from (select (select c.storeroom_name
+                  from dc.jc_storeroom c
+                 where c.storeroom_id = a.storageroom_id) 库房名称,
+               (select d.cargo_type_id
+                  from dc.jc_goods d
+                 where d.supplies_id = a.supplies_id) 物质种类,
+               sum(nvl(a.goods_weight, '0')) 货重
+          from dc.cc_goods_stock a
+         where a.status = '1'
+         group by a.storageroom_id, a.supplies_id) l
+ group by l.库房名称, 物质种类 order by l.库房名称
+    </select>
+</mapper>

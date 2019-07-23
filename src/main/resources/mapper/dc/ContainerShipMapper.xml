@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.dc.DcContainerShipDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jzx.ContainerShip">
+        select substr(in_berth_time,6,5) rq,ship_name cmc,voyage_no hc,berth_no bwmc,status zt,remark bz from dc.jzx_ship_info
+where substr(in_berth_time,0,10)=to_char((TRUNC(SYSDATE-1)),'yyyy-mm-dd')
+    </select>
+</mapper>

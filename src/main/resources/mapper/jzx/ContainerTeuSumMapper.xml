@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.jzx.ContainerTeuSumDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jzx.ContainerTeuSum">
+        select sum(trunc(CONTAINER_SIZE/20)) teusum from
+ hz.yw_loading_unload_ship_detail a
+ left join hz.yw_loading_unload_ship_plan b on a.order_code=b.order_code
+ where  b.plan_status>=6 and substr(CLOSE_TIME,0,7)=to_char(Trunc(sysdate),'yyyy-mm') and a.task_type in ('1','2')
+  group by substr(CLOSE_TIME,0,7)
+    </select>
+</mapper>

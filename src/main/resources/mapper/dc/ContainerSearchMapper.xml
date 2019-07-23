@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.dc.DcContainerSearchDao">
+    <select id="findOne" resultType="com.harbour.ws.domain.jzx.ContainerSearch">
+        SELECT B.OBJECT_CODE CODE,A.YARD_AREA_NO MC FROM (SELECT YARD_AREA_NO FROM DC.YW_CONTAINER_INFO
+        WHERE IF_SPOT=1 AND CONTAINER_ID=#{code}) A
+        LEFT JOIN DC.OBJECT_CODE B ON B.OLD_NAME=A.YARD_AREA_NO
+  </select>
+</mapper>

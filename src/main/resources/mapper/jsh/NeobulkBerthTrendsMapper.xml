@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.jsh.NeobulkBerthTrendsDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jsh.NeobulkBerthTrends">
+        select dt,mc,cmc,zxlb,LISTAGG(hwzl,',') WITHIN GROUP( ORDER BY code,dt,mc,cmc,zxlb) hwzl,code from(
+select distinct a.code,
+case when d.mc is null then '-' else d.mc end hwzl,
+case when b.cbztmc is not null then '使用中' else '空闲' end dt,
+a.bwmc mc,
+case when c.cbzwmc is null then '-' else c.cbzwmc end cmc,
+case when ZXLBBM='01' then '装'
+  when ZXLBBM='02' then '卸' when ZXLBBM is null then '-' end zxlb
+ from (select  t.*,'JSH-S01-'||replace(lpad((rank() over(order by bwbm)),4),' ','0') code from gyold.BWXX t) a
+left join
+(select *from
+(select t.*,rank() over(partition by bwmc order by dmsj desc) rank
+from gyold.cbdt t  where cbztmc='在港' and bwmc is not null
+) where rank=1) b on a.bwbm=b.bwbm
+left join gyold.cbzl c on b.cbbh=c.cbbh
+left join
+(select c.mc lx,b.mc,htydbh,cbbh,hc,d.mc qygmc ,e.mc ddgmc,shbz,'万吨' dw, zl from gyold.HWJJQD a left join
+gyold.HWLB  b on a.hwdm=b.bm
+left join gyold.HWLB c on b.flbm=c.bm
+left join gyold.GKMCDM d on a.qygdm=d.bm
+left join gyold.GKMCDM e on a.ddgdm=d.bm) d
+on b.cbbh=d.cbbh  and b.hc=d.hc)
+group by code,dt,mc,cmc,zxlb
+    </select>
+</mapper>

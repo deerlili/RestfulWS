@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.jzx.QuayCraneObjectDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jzx.QuayCraneObject">
+        select distinct code,MACHINE_NAME mc,
+case when if_word=1 then '作业中'
+  when if_word=0 and status is not null then status
+    else '空闲' end zt,
+case when SERVICE_TYPE=1 then '装船'
+when SERVICE_TYPE=2 then '卸船'
+  when SERVICE_TYPE=3 then '移箱'
+    when SERVICE_TYPE is null then '-'
+    else '未知' end zynr
+ from (select  t.*,'JZX-J01-'||replace(lpad((rank() over(order by MACHINE_ID)),4),' ','0') code from hz.jc_machine_info t where MACHINE_TYPE='10020000000000000025') a left join hz.jc_trailer_group b on a.MACHINE_ID=b.SERVICE_MACHINE
+    </select>
+</mapper>

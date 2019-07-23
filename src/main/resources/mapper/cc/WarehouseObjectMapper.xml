@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.cc.WarehouseObjectDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.cc.WarehouseObject">
+       	select  code,mc,sum(zl) zkc,max(case hwzl when '板材' then zl else 0 end) bc,
+             max(case hwzl when '型材' then zl else 0 end) xc,
+             max(case hwzl when '建材' then zl else 0 end) jc,
+             max(case hwzl when '优钢' then zl else 0 end) yg,
+             max(case hwzl when '卷材' then zl else 0 end) jcl,
+             max(case hwzl when '管材' then zl else 0 end) gc,
+             max(case hwzl when '有色金属' then zl else 0 end) ysjs,
+             max(case hwzl when '容器板' then zl else 0 end) rqb,
+             max(case hwzl when '其它' then zl else 0 end) qt
+from   (select  'CC-S04-'||code code,l.mc,
+       (select g.supplies_type_name
+          from wl.JC_SUPPLIES_TYPE g
+         where g.supplies_type_id = l.hwzl) hwzl,
+       sum(zl) zl
+  from (select (select f.STOREROOM_ID
+                  from wl.jc_storeroom f
+                 where f.storeroom_id = a.storageroom_id) code,
+                 (select c.storeroom_name
+                  from wl.jc_storeroom c
+                 where c.storeroom_id = a.storageroom_id) mc,
+               (select d.cargo_type_id
+                  from wl.jc_goods d
+                 where d.supplies_id = a.supplies_id) hwzl,
+               sum(nvl(a.goods_weight, '0')) zl
+          from wl.cc_goods_stock a
+         where a.status = '1'
+         group by a.storageroom_id, a.supplies_id) l
+ group by 'CC-S04-'||code,l.mc, hwzl) GROUP BY code,mc
+  </select>
+</mapper>

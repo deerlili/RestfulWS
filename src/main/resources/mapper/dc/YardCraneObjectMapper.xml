@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.dc.DcYardCraneObjectDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jzx.YardCraneObject">
+      select code,mc,status zt,case when WORKING_INFO is null then '-' else WORKING_INFO end zynr
+  from (select object_code code,b.name mc,b.status,WORKING_INFO,old_code  from  dc.object_code a left join
+ dc.gy_fixed_machine_info b on a.old_name=b.name where objecttype_code='JZX-J02')
+ a ORDER BY code
+    </select>
+</mapper>

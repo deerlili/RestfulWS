@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.jzx.YardCraneObjectDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jzx.YardCraneObject">
+        select distinct code,a.machine_name mc,
+ case when c.if_used=0 then '故障'
+   when  b.COMMAND_STATUS!=2 then '使用中'
+     else '空闲'
+    end zt,
+case when TASK_OBJECTIVE ='1' then '进场'
+  when TASK_OBJECTIVE ='2' then '提箱'
+    when TASK_OBJECTIVE ='3' then '装船'
+      when TASK_OBJECTIVE ='4' then '卸船'
+        when TASK_OBJECTIVE ='5' then '装箱出场'
+          when TASK_OBJECTIVE ='6' then '拆箱出场'
+            when TASK_OBJECTIVE ='7' then '装箱返场'
+              when TASK_OBJECTIVE ='8' then '拆箱返场'
+                when TASK_OBJECTIVE ='9' then '特殊移返'
+                  when TASK_OBJECTIVE ='0' then '特殊移箱'
+                    when TASK_OBJECTIVE ='A' then '整理堆场'
+										  else '-' end zynr
+  from (select  t.*,'JZX-J02-'||replace(lpad((rank() over(order by machine_name)),4),' ','0') code from hz.jc_machine_info t where MACHINE_TYPE='10020000000000000022') a left join (select CRANE,COMMAND_TIME,COMMAND_STATUS,TASK_OBJECTIVE from
+(select CRANE,COMMAND_TIME,COMMAND_STATUS,TASK_OBJECTIVE,row_number() over(partition by CRANE  order by COMMAND_TIME desc) rank from hz.yw_command_info
+where command_time>to_char(Trunc(sysdate),'yyyy-mm-dd HH24:MI:SS')) where rank=1) b
+on a.machine_id=b.CRANE
+left join (select distinct machine_id,if_used from hz.dc_machine_config) c on a.machine_id=c.machine_id
+    </select>
+</mapper>

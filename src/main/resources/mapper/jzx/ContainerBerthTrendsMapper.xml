@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.jzx.ContainerBerthTrendsDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jzx.ContainerBerthTrends">
+        select case when PLAN_STATUS is null then '空闲'
+else '使用中' end dt,berth_name mc,
+case when SHIP_NAME is null then '-' else SHIP_NAME end cmc,
+case when PLAN_TYPE=1 then '装' when  PLAN_TYPE=0 then '卸' when PLAN_TYPE is null then '-' end zxlb,
+'JZX-S01-'||replace(lpad((rank() over(order by berth_name)),4),' ','0') code
+from hz.jc_berth a left join (select *from hz.yw_loading_unload_ship_plan where
+ PLAN_STATUS in (3,4,5,6)) b on a.berth_id=b.DOCK_BERTH_CODE
+    </select>
+</mapper>

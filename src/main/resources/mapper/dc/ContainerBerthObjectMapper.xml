@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.dc.DcContainerBerthObjectDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jzx.ContainerBerthObject">
+         select code,a.BERTH_NAME mc,
+case when b.BERTH_STATUS is null then '空闲'
+  else '使用中' end zt,
+case when b.SHIP_NAME is null then '-' else b.SHIP_NAME end cmc,
+case when b.VOYAGE_NO  is null then '-' else b.VOYAGE_NO  end hc,
+case when b.SHIP_OWNER is null then '-' else b.SHIP_OWNER end cbgs,
+case when IN_BERTH_TIME is null then '-' else IN_BERTH_TIME end rgsj,
+case when IN_TIME is null then '-' else IN_TIME end kbsj,
+'-' jhkbsj,
+'-' zykssj,
+'-' zyjssj,
+case when c.cm is null then '-' else c.cm end cm
+from (select object_code code,berth_name  from   dc.berth_basic_info a left join dc.object_code b on a.berth_name=b.old_name where belong_dock='集装箱' and b.objecttype_code='JZX-S01') a
+left join (select*from dc.JZX_SHIP_INFO where berth_status in (3,4,5,6)) b on a.berth_name=b.berth_no
+left join (select bw,LISTAGG(mc,',') WITHIN GROUP( ORDER BY rq) cm from (
+ select substr(IN_TIME,0,10) rq,SHIP_NAME mc,VOYAGE_NO hc,BERTH_NO bw,REMARK bz from
+dc.jzx_ship_info where IN_TIME>=to_char(Trunc(sysdate),'yyyy-mm-dd HH24:MI:SS')
+AND BERTH_NO is not null
+) GROUP BY bw) c on a.BERTH_NAME=c.bw
+    </select>
+</mapper>

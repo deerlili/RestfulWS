@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.dc.DcNeobulkBerthTrendsDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jsh.NeobulkBerthTrends">
+        select dt,berth_name mc,ship_name cmc,PLAN_TYPE zxlb,LISTAGG(CARGO_NAME,',') WITHIN GROUP( ORDER BY code,dt,berth_name,ship_name,PLAN_TYPE) hwzl,code from(
+select distinct a.OBJECT_CODE code,case when c.status is null then '空闲' else '使用中' end dt,b.berth_name,
+case when c.ship_name is null then '-' else c.ship_name end ship_name,
+case when PLAN_TYPE='01' then '装' when PLAN_TYPE='02' then '卸' when PLAN_TYPE is null then '-' end PLAN_TYPE,
+case when CARGO_NAME is null then '-' else CARGO_NAME end CARGO_NAME from
+(select *from dc.object_code where OBJECTTYPE_CODE='JSH-S01')  a
+left join (select *from dc.berth_basic_info where belong_dock='件散货') b on a.old_name=b.berth_name
+left join
+(select ship_name,VOYAGE_NO,SHIP_CODE,PLAN_TYPE,STATUS,BERTH_NO from ( select ship_name,VOYAGE_NO,SHIP_CODE,PLAN_TYPE,STATUS,BERTH_NO,rank() over(partition by  ship_name,VOYAGE_NO,SHIP_CODE,PLAN_TYPE,STATUS,BERTH_NO order by in_berth_time desc) rank
+from dc.jsh_ship_info  where STATUS='在港' and BERTH_NO is not null) where rank=1) c on a.old_name=c.berth_no
+left join dc.jsh_voyage_cargo_list d on c.ship_code=d.ship_code and c.voyage_no=d.voyage_no)
+group by code,dt,berth_name,ship_name,PLAN_TYPE
+    </select>
+</mapper>

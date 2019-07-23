@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.dc.DcNeobulkBerthObjectDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jsh.NeobulkBerthObject">
+        select code,
+case when b.BERTH_NO is null then '-' else b.BERTH_NO end mc,
+case when b.status is not null then '使用中' else '空闲' end zt,
+case when b.SHIP_NAME is null then '-' else b.SHIP_NAME end cmc,
+case when b.VOYAGE_NO is null then '-' else b.VOYAGE_NO end hc,
+case when b.SHIP_OWNER is null then '-' else b.SHIP_OWNER end cbgs,
+case when IN_TIME is null then '-' else IN_TIME end rgsj,
+case when IN_BERTH_TIME is null then '-' else IN_BERTH_TIME end kbsj,
+'-' jhkbsj,
+'-' zykssj,
+'-' zyjssj
+  from (select object_code code,berth_name  from   dc.berth_basic_info a left join dc.object_code b on a.berth_name=b.old_name where belong_dock='件散货' and b.objecttype_code='JSH-S01') a
+left join
+(select *from (select t.*,rank() over(partition by berth_no order by IN_BERTH_TIME desc) rank from dc.JSH_SHIP_INFO t where status='在港' and berth_no is not null
+) where rank=1) b on a.berth_name=b.BERTH_NO
+    </select>
+</mapper>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.dc.DcWarehouseObjectDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.dc.WarehouseObject">
+       	select object_code  code,b.STOREROOM_NAME mc,sum(a.goods_weight) zkc from dc.cc_goods_stock a left join dc.jc_storeroom b on a.STORAGEROOM_ID=STOREROOM_ID
+left join dc.object_code c on b.STOREROOM_NAME=c.old_name
+where a.status = '1'  group by object_code,STOREROOM_NAME
+  </select>
+</mapper>

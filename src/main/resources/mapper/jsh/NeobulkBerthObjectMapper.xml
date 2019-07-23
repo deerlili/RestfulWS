@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.jsh.NeobulkBerthObjectDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jsh.NeobulkBerthObject">
+        select code,a.bwmc mc,
+case when b.cbztmc is not null then '使用中' else '空闲' end zt,
+case when c.cbzwmc is null then '-' else c.cbzwmc end cmc,
+case when b.hc is null then '-' else b.hc end hc,
+case when b.cdmc is null then '-' else b.cdmc end cbgs,
+case when b.dmsj is null then '-' else to_char(b.dmsj,'yyyy-mm-dd hh24:mi:ss') end rgsj,
+case when KBKSSJ is null then '-' else to_char(KBKSSJ,'yyyy-mm-dd hh24:mi:ss') end kbsj,
+'-' jhkbsj,
+case when SCBTZZYSJ is null then '-' else to_char(SCBTZZYSJ,'yyyy-mm-dd hh24:mi:ss') end zykssj,
+case when WGSJ is null then '-' else to_char(WGSJ,'yyyy-mm-dd hh24:mi:ss') end zyjssj
+
+from ( select  t.*,'JSH-S01-'||replace(lpad((rank() over(order by bwbm)),4),' ','0') code from gyold.BWXX t) a
+left join
+(select *from
+(select t.*,rank() over(partition by bwmc order by dmsj desc) rank
+from gyold.cbdt t  where cbztmc='在港' and bwmc is not null
+) where rank=1) b on a.bwbm=b.bwbm
+left join gyold.cbzl c on b.cbbh=c.cbbh
+    </select>
+</mapper>

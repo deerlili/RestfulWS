@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.jzx.ContainerBerthObjectDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jzx.ContainerBerthObject">
+        select code,a.BERTH_NAME mc,
+        case when b.plan_status is null then '空闲'
+        else '使用中' end zt,
+        case when b.SHIP_NAME is null then '-' else b.SHIP_NAME end cmc,
+				case when b.VOYAGE_NUMBER is null then '-' else b.VOYAGE_NUMBER end hc,
+				case when c.full_name is null then '-' else c.full_name end cbgs,
+				case when ESTIMATED_BERTHING_TIME is null then '-' else ESTIMATED_BERTHING_TIME end rgsj,
+				case when REALITY_BERTHING_TIME is null then '-' else REALITY_BERTHING_TIME end kbsj,
+				'-' jhkbsj,
+				case when START_TIME is null then '-' else START_TIME end zykssj,
+				case when END_TIME is null then '-' else END_TIME end zyjssj,
+				case when d.cm is null then '-' else d.cm end cm
+        from (select  t.*,'JZX-S01-'||replace(lpad((rank() over(order by BERTH_NAME desc)),4),' ','0') code from hz.jc_berth t) a left join (select *from hz.yw_loading_unload_ship_plan
+        where PLAN_STATUS in (3,4,5,6)) b on b.dock_berth_code=a.berth_id
+        left join hz.jc_customer c on b.SHIP_OWNER=c.customer_id
+			  left join (select bw,LISTAGG(mc,',') WITHIN GROUP( ORDER BY rq) cm from (
+select substr(ESTIMATED_BERTHING_TIME,0,10) rq,SHIP_NAME mc,VOYAGE_NUMBER hc,berth_name bw from
+hz.yw_loading_unload_ship_plan a left join hz.jc_berth b on a.DOCK_BERTH_CODE=b.berth_id
+where ESTIMATED_BERTHING_TIME>=to_char(Trunc(sysdate),'yyyy-mm-dd HH24:MI:SS') and berth_name is not null) GROUP BY bw)
+				d on a.BERTH_NAME=d.bw
+  </select>
+</mapper>

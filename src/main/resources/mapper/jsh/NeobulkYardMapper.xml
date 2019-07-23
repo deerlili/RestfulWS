@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.jsh.NeobulkYardDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jsh.NeobulkYard">
+        select  code,mc,
+        case when LISTAGG(hwlx,',') WITHIN GROUP( ORDER BY mc) is null then '-' else LISTAGG(hwlx,',') WITHIN GROUP( ORDER BY mc) end hwlx,
+        case when sum(ds) is null then '-' else to_char(sum(ds)) end ds from(
+        select  code,mc,qk,case when rank &lt;= 2 then hwlx else '其他' end hwlx,ds from(
+        select code,mc,qk,hwlx,ds, rank() over(partition by mc,qk order by ds desc) rank from
+        (select code,m.dcmc mc,dcqkbh qk,p.mc hwlx,sum(x.zl) ds from
+        (select a.*,'JSH-S02-'||a.dcbh||qkh code,b.dcmc||a.qkh dcmc from gyold.DCFQXX a left join gyold.DCXX b on a.dcbh=b.dcbh )m left join
+        (select dcbh,dcqkbh,zl,zxhtbh from gyold.XHLHD where shbz=1
+        union all
+        select dcbh,dcqkbh,zl*(-1),zxhtbh from gyold.ZHLHD a left join gyold.HWTYD b on a.tydbh=b.tydbh where a.shbz=1) x
+        on x.dcbh=m.dcbh and m.qkh=x.dcqkbh
+        left join gyold.HWJJQD y on x.zxhtbh=y.htydbh
+        left join gyold.HWLB n on y.hwdm=n.bm
+        left join gyold.HWLB p on p.bm=n.flbm
+        left join gyold.KHXX z on y.hzdm=z.khdm
+        group by code,dcmc,dcqkbh,p.mc)))
+        group by code,mc order by code,mc
+    </select>
+</mapper>

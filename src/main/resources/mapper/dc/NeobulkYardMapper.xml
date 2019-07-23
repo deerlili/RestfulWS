@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.dc.DcNeobulkYardDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jsh.NeobulkYard">
+        select code,old_name mc,LISTAGG(mc,',') WITHIN GROUP( ORDER BY old_name) hwlx,sum(zl) ds from (
+select code,old_name,case when rank>3 then mc else '' end mc,zl from(
+select code,old_name,mc,zl,rank() over(partition by old_name order by zl desc) rank from
+(select code,m.old_name,p.mc,sum(x.zl) zl from
+( select object_code code,old_name,old_code from dc.object_code where objecttype_code='JSH-S02') m left join
+(select dcbh,zl,zxhtbh from dc.XHLHD where shbz=1
+union all
+select dcbh,zl*(-1),zxhtbh from dc.ZHLHD a left join dc.HWTYD b on a.tydbh=b.tydbh where a.shbz=1) x on x.dcbh=m.old_code
+left join dc.HWJJQD y on x.zxhtbh=y.htydbh
+left join dc.HWLB n on y.hwdm=n.bm
+left join dc.HWLB p on p.bm=n.flbm
+group by code,old_name,p.mc))) group by code,old_name
+    </select>
+</mapper>

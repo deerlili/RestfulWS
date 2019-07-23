@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.jzx.ContainerSearchDao">
+    <select id="findOne" resultType="com.harbour.ws.domain.jzx.ContainerSearch">
+        	select 'JZX-S02-'||replace(lpad((rank() over(order by b.CONTAINER_YARD_AREA_ID)),4),' ','0') CODE,a.YARD_AREA_NO MC
+	from (select YARD_AREA_NO from hz.yw_container_info where IF_SPOT=1 and CONTAINER_ID=#{code}) a
+	left join hz.dc_container_yard_area b on b.yard_area_no=a.yard_area_no
+  </select>
+</mapper>

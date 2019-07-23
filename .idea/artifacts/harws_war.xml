@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="harws:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="HarbourWS-2.1.3.RELEASE.war">
+      <element id="artifact" artifact-name="harws:war exploded" />
+    </root>
+  </artifact>
+</component>

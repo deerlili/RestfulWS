@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.jzx.ContainerShipDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jzx.ContainerShip">
+         select substr(start_time,6,5) rq,ship_name cmc,voyage_number hc,berth_name bwmc,
+ case when plan_status=1 then '准备'
+    when plan_status=2 then '正常'
+       when plan_status=3 then '靠泊'
+          when plan_status=4 then '作业中'
+             when plan_status=5 then '作业结束'
+                when plan_status=6 then '封航'
+                   when plan_status=7 then '离泊'
+                      when plan_status=0 then '作废' end zt,
+											case when remark is null then '-' else remark end bz
+ from hz.yw_loading_unload_ship_plan  a
+ left join hz.jc_berth b on  a.dock_berth_code=b.berth_id
+ where substr(start_time,0,10)=to_char((TRUNC(SYSDATE)),'yyyy-mm-dd') and plan_status!=0
+    </select>
+</mapper>

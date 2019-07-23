@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.cc.WarehouseProductionSumDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.cc.WarehouseProductionSum">
+        select '出库' type,sum(a.realout_weight) mm,
+	sum(case when substr(a.audi_time,0,10)=TO_CHAR(SYSDATE, 'YYYY-MM-DD') then a.realout_weight else 0 end) dd
+from wl.cc_outsendgoodsbill a
+where substr(a.audi_time,0,7)=TO_CHAR(SYSDATE, 'YYYY-MM') and a.status = '6'
+  and a.out_way in (select id from wl.jc_dictionary d where d.name in ('提货出库','对接出库','罢单出库'))
+union all
+select '入库' type,sum(a.in_account_weight) mm,
+	sum(case when substr(a.account_time,0,10)=TO_CHAR(SYSDATE, 'YYYY-MM-DD') then a.in_account_weight else 0 end) dd
+from WL.cc_stock_bill a
+where substr(a.account_time,0,7)=TO_CHAR(SYSDATE, 'YYYY-MM') and a.status = '2'
+	and a.in_way in (select a.id from WL.jc_dictionary a where a.name in ( '专线入库','水运入库','汽车入库','退货入库','专线对交','汽运对交','船运对交'))
+    </select>
+</mapper>

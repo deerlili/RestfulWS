@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须指向Dao接口 -->
+<mapper namespace="com.harbour.ws.dao.dc.DcNeobulkCargoSumDao">
+    <select id="findAll" resultType="com.harbour.ws.domain.jsh.NeobulkCargoSum">
+         select ROUND(sum(zl)/10000,4) zl from
+(select gbrq,zl,b.zxhtbh from dc.ZHLHD a left join dc.HWTYD b on a.tydbh=b.tydbh
+union all
+select gbrq,zl,zxhtbh from dc.XHLHD
+union all
+select gbrq,zl,b.zxhtbh from dc.ZFLHD a left join dc.HWTYD b on a.tydbh=b.tydbh
+union all
+select  zysj,hwzz*2,tdhhxm from dc.ZXZYNR where czgc='CC') a where to_char(Trunc(gbrq),'yyyy-mm')=to_char(Trunc(sysdate),'yyyy-mm')
+group by to_char(Trunc(gbrq),'yyyy-mm')
+    </select>
+</mapper>
